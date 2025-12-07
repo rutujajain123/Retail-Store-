@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS sales (
   quantity INTEGER,
   price_per_unit REAL,
   discount_percentage REAL,
+  discount_amount REAL,
   total_amount REAL,
   final_amount REAL,
   payment_method TEXT,
@@ -45,13 +46,13 @@ const insertSQL = `
 INSERT OR REPLACE INTO sales (
   transaction_id, date, customer_id, customer_name, phone_number, gender, age,
   customer_region, customer_type, product_id, product_name, brand, product_category,
-  tags, quantity, price_per_unit, discount_percentage, total_amount, final_amount,
+  tags, quantity, price_per_unit, discount_percentage, discount_amount, total_amount, final_amount,
   payment_method, order_status, delivery_type, store_id, store_location,
   salesperson_id, employee_name
 ) VALUES (
   @transaction_id, @date, @customer_id, @customer_name, @phone_number, @gender, @age,
   @customer_region, @customer_type, @product_id, @product_name, @brand, @product_category,
-  @tags, @quantity, @price_per_unit, @discount_percentage, @total_amount, @final_amount,
+  @tags, @quantity, @price_per_unit, @discount_percentage, @discount_amount, @total_amount, @final_amount,
   @payment_method, @order_status, @delivery_type, @store_id, @store_location,
   @salesperson_id, @employee_name
 );
@@ -83,6 +84,10 @@ const ingest = async () => {
       .pipe(csv())
       .on('data', (row) => {
         try {
+          const totalAmount = toNumber(row['Total Amount']) || 0
+          const discountPercentage = toNumber(row['Discount Percentage']) || 0
+          const discountAmount = totalAmount * (discountPercentage / 100)
+          
           insertStmt.run({
             transaction_id: row['Transaction ID'],
             date: row['Date'],
@@ -100,8 +105,9 @@ const ingest = async () => {
             tags: JSON.stringify(parseTags(row['Tags'])),
             quantity: toNumber(row['Quantity']) || 0,
             price_per_unit: toNumber(row['Price per Unit']) || 0,
-            discount_percentage: toNumber(row['Discount Percentage']) || 0,
-            total_amount: toNumber(row['Total Amount']) || 0,
+            discount_percentage: discountPercentage,
+            discount_amount: discountAmount,
+            total_amount: totalAmount,
             final_amount: toNumber(row['Final Amount']) || 0,
             payment_method: row['Payment Method'],
             order_status: row['Order Status'],

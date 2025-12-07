@@ -33,6 +33,89 @@ router.get('/meta', (_req, res) => {
   res.json({ regions, genders, categories, payments, tags })
 })
 
+// Aggregated view: stores
+router.get('/stores', (_req, res) => {
+  const rows = db.prepare(`
+    SELECT 
+      store_id,
+      store_location,
+      COUNT(*) as transactions,
+      SUM(quantity) as totalQuantity,
+      SUM(total_amount) as totalAmount,
+      SUM(discount_amount) as totalDiscount
+    FROM sales
+    GROUP BY store_id, store_location
+    ORDER BY transactions DESC
+  `).all()
+
+  res.json(rows)
+})
+
+// Aggregated view: products
+router.get('/products', (_req, res) => {
+  const rows = db.prepare(`
+    SELECT 
+      product_id,
+      product_name,
+      brand,
+      product_category,
+      SUM(quantity) as totalQuantity,
+      SUM(total_amount) as totalAmount,
+      SUM(discount_amount) as totalDiscount,
+      COUNT(*) as transactions
+    FROM sales
+    GROUP BY product_id, product_name, brand, product_category
+    ORDER BY totalQuantity DESC
+  `).all()
+
+  res.json(rows)
+})
+
+// Aggregated view: customers
+router.get('/customers', (_req, res) => {
+  const rows = db.prepare(`
+    SELECT 
+      customer_id,
+      customer_name,
+      gender,
+      customer_region,
+      age,
+      COUNT(*) as orders,
+      SUM(total_amount) as totalAmount,
+      SUM(discount_amount) as totalDiscount,
+      SUM(quantity) as totalQuantity
+    FROM sales
+    GROUP BY customer_id, customer_name, gender, customer_region, age
+    ORDER BY orders DESC
+  `).all()
+
+  res.json(rows)
+})
+
+// Flat view: recent orders
+router.get('/orders', (req, res) => {
+  const limit = Math.min(500, parseInt(req.query.limit ?? '200', 10) || 200)
+
+  const rows = db.prepare(`
+    SELECT 
+      transaction_id,
+      date,
+      customer_name,
+      order_status,
+      delivery_type,
+      payment_method,
+      store_location,
+      total_amount,
+      discount_amount,
+      final_amount
+    FROM sales
+    ORDER BY date DESC
+    LIMIT @limit
+  `).all({ limit })
+
+  res.json(rows)
+})
+
 router.get('/', (req, res) => {
   const {
     search = '',

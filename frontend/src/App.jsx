@@ -10,6 +10,7 @@ const sortOptions = [
 ]
 
 function App() {
+  const [activeView, setActiveView] = useState('dashboard')
   const [search, setSearch] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('')
   const [selectedGender, setSelectedGender] = useState('')
@@ -54,8 +55,13 @@ function App() {
     totalAmount: 0,
     totalDiscount: 0,
   })
+  const [stores, setStores] = useState([])
+  const [products, setProducts] = useState([])
+  const [customers, setCustomers] = useState([])
+  const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [poppingRow, setPoppingRow] = useState(null)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -105,7 +111,7 @@ function App() {
     if (dateStart) params.set('dateStart', dateStart)
     if (dateEnd) params.set('dateEnd', dateEnd)
 
-    fetch(`${API_BASE}/api/sales?${params.toString()}`, { signal: controller.signal })
+    const fetchDashboard = () => fetch(`${API_BASE}/api/sales?${params.toString()}`, { signal: controller.signal })
       .then((r) => {
         if (!r.ok) throw new Error('Failed to fetch sales data')
         return r.json()
@@ -117,18 +123,63 @@ function App() {
         setPage(Math.min(json.page || 1, json.totalPages || 1))
         setMetrics(json.metrics || { totalQuantity: 0, totalAmount: 0, totalDiscount: 0 })
       })
-      .catch((err) => {
+
+    const fetchStores = () => fetch(`${API_BASE}/api/sales/stores`, { signal: controller.signal })
+      .then((r) => {
+        if (!r.ok) throw new Error('Failed to fetch stores data')
+        return r.json()
+      })
+      .then(setStores)
+
+    const fetchProducts = () => fetch(`${API_BASE}/api/sales/products`, { signal: controller.signal })
+      .then((r) => {
+        if (!r.ok) throw new Error('Failed to fetch products data')
+        return r.json()
+      })
+      .then(setProducts)
+
+    const fetchCustomers = () => fetch(`${API_BASE}/api/sales/customers`, { signal: controller.signal })
+      .then((r) => {
+        if (!r.ok) throw new Error('Failed to fetch customers data')
+        return r.json()
+      })
+      .then(setCustomers)
+
+    const fetchOrders = () => fetch(`${API_BASE}/api/sales/orders`, { signal: controller.signal })
+      .then((r) => {
+        if (!r.ok) throw new Error('Failed to fetch orders data')
+        return r.json()
+      })
+      .then(setOrders)
+
+    const work = async () => {
+      try {
+        if (activeView === 'dashboard') await fetchDashboard()
+        if (activeView === 'stores') await fetchStores()
+        if (activeView === 'products') await fetchProducts()
+        if (activeView === 'customers') await fetchCustomers()
+        if (activeView === 'orders') await fetchOrders()
+      } catch (err) {
         if (err.name === 'AbortError') return
         setError(err.message)
-      })
-      .finally(() => setLoading(false))
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    work()
 
     return () => controller.abort()
-  }, [search, selectedRegion, selectedGender, selectedCategory, selectedPayment, selectedTag, selectedAgeRange, dateStart, dateEnd, sortBy, page])
+  }, [activeView, search, selectedRegion, selectedGender, selectedCategory, selectedPayment, selectedTag, selectedAgeRange, dateStart, dateEnd, sortBy, page])
 
   const handlePageChange = (next) => {
     if (next < 1 || next > totalPages) return
     setPage(next)
+  }
+
+  const handleRowPop = (rowId) => {
+    setPoppingRow(rowId)
+    setTimeout(() => setPoppingRow(null), 800)
   }
 
   return (
@@ -136,11 +187,11 @@ function App() {
       <aside className="side-nav">
         <div className="brand">Retail Sales</div>
         <nav>
-          <span className="nav-item active">Dashboard</span>
-          <span className="nav-item">Stores</span>
-          <span className="nav-item">Products</span>
-          <span className="nav-item">Customers</span>
-          <span className="nav-item">Orders</span>
+          <span className={`nav-item ${activeView === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveView('dashboard')}>Dashboard</span>
+          <span className={`nav-item ${activeView === 'stores' ? 'active' : ''}`} onClick={() => setActiveView('stores')}>Stores</span>
+          <span className={`nav-item ${activeView === 'products' ? 'active' : ''}`} onClick={() => setActiveView('products')}>Products</span>
+          <span className={`nav-item ${activeView === 'customers' ? 'active' : ''}`} onClick={() => setActiveView('customers')}>Customers</span>
+          <span className={`nav-item ${activeView === 'orders' ? 'active' : ''}`} onClick={() => setActiveView('orders')}>Orders</span>
         </nav>
       </aside>
 
@@ -173,6 +224,7 @@ function App() {
           </div>
         </section>
 
+        {activeView === 'dashboard' && (
         <section className="filters">
           <div className="filters-left">
             <div className="filter-dropdown">
@@ -261,7 +313,9 @@ function App() {
             </div>
           </div>
         </section>
+        )}
 
+        {activeView === 'dashboard' && (
         <section className="metrics">
           <div className="metric-card">
             <div className="metric-label">Total units sold</div>
@@ -276,7 +330,9 @@ function App() {
             <div className="metric-value">₹{metrics.totalDiscount.toLocaleString('en-IN')} ({total} SRs)</div>
           </div>
         </section>
+        )}
 
+        {activeView === 'dashboard' && (
         <section className="table-card">
           <div className="table-head">
             <div className="table-title">Full table view</div>
@@ -312,7 +368,11 @@ function App() {
                   </tr>
                 ) : (
                   rows.map((row) => (
-                    <tr key={row.transaction_id}>
+                    <tr 
+                      key={row.transaction_id}
+                      className={`row-pop-active ${poppingRow === row.transaction_id ? 'row-popping' : ''}`}
+                      onClick={() => handleRowPop(row.transaction_id)}
+                    >
                       <td>{row.transaction_id}</td>
                       <td>{row.date}</td>
                       <td>{row.customer_id}</td>
@@ -358,6 +418,197 @@ function App() {
             </button>
           </div>
         </section>
+        )}
+
+        {activeView === 'stores' && (
+          <section className="table-card">
+            <div className="table-head">
+              <div className="table-title">Stores overview</div>
+              <div className="status-pill">{stores.length} stores</div>
+            </div>
+            {error && <div className="error-banner">{error}</div>}
+            {loading && <div className="status-pill">Loading...</div>}
+            <div className="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Store ID</th>
+                    <th>Location</th>
+                    <th>Transactions</th>
+                    <th>Units</th>
+                    <th>Total Amount</th>
+                    <th>Total Discount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stores.length === 0 ? (
+                    <tr><td colSpan={6} className="empty-row">No store data</td></tr>
+                  ) : (
+                    stores.map((s) => (
+                      <tr 
+                        key={s.store_id}
+                        className={`row-pop-active ${poppingRow === s.store_id ? 'row-popping' : ''}`}
+                        onClick={() => handleRowPop(s.store_id)}
+                      >
+                        <td>{s.store_id}</td>
+                        <td>{s.store_location}</td>
+                        <td>{s.transactions}</td>
+                        <td>{s.totalQuantity}</td>
+                        <td>₹ {Number(s.totalAmount || 0).toLocaleString('en-IN')}</td>
+                        <td>₹ {Number(s.totalDiscount || 0).toLocaleString('en-IN')}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
+        {activeView === 'products' && (
+          <section className="table-card">
+            <div className="table-head">
+              <div className="table-title">Products overview</div>
+              <div className="status-pill">{products.length} products</div>
+            </div>
+            {error && <div className="error-banner">{error}</div>}
+            {loading && <div className="status-pill">Loading...</div>}
+            <div className="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Product</th>
+                    <th>Brand</th>
+                    <th>Category</th>
+                    <th>Transactions</th>
+                    <th>Units</th>
+                    <th>Total Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {products.length === 0 ? (
+                    <tr><td colSpan={6} className="empty-row">No product data</td></tr>
+                  ) : (
+                    products.map((p) => (
+                      <tr 
+                        key={p.product_id}
+                        className={`row-pop-active ${poppingRow === p.product_id ? 'row-popping' : ''}`}
+                        onClick={() => handleRowPop(p.product_id)}
+                      >
+                        <td>{p.product_name}</td>
+                        <td>{p.brand}</td>
+                        <td>{p.product_category}</td>
+                        <td>{p.transactions}</td>
+                        <td>{p.totalQuantity}</td>
+                        <td>₹ {Number(p.totalAmount || 0).toLocaleString('en-IN')}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
+        {activeView === 'customers' && (
+          <section className="table-card">
+            <div className="table-head">
+              <div className="table-title">Customers overview</div>
+              <div className="status-pill">{customers.length} customers</div>
+            </div>
+            {error && <div className="error-banner">{error}</div>}
+            {loading && <div className="status-pill">Loading...</div>}
+            <div className="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Customer</th>
+                    <th>Gender</th>
+                    <th>Region</th>
+                    <th>Age</th>
+                    <th>Orders</th>
+                    <th>Units</th>
+                    <th>Total Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {customers.length === 0 ? (
+                    <tr><td colSpan={7} className="empty-row">No customer data</td></tr>
+                  ) : (
+                    customers.map((c) => (
+                      <tr 
+                        key={c.customer_id}
+                        className={`row-pop-active ${poppingRow === c.customer_id ? 'row-popping' : ''}`}
+                        onClick={() => handleRowPop(c.customer_id)}
+                      >
+                        <td>{c.customer_name}</td>
+                        <td>{c.gender}</td>
+                        <td>{c.customer_region}</td>
+                        <td>{c.age}</td>
+                        <td>{c.orders}</td>
+                        <td>{c.totalQuantity}</td>
+                        <td>₹ {Number(c.totalAmount || 0).toLocaleString('en-IN')}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
+        {activeView === 'orders' && (
+          <section className="table-card">
+            <div className="table-head">
+              <div className="table-title">Recent orders</div>
+              <div className="status-pill">{orders.length} orders</div>
+            </div>
+            {error && <div className="error-banner">{error}</div>}
+            {loading && <div className="status-pill">Loading...</div>}
+            <div className="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Transaction</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Status</th>
+                    <th>Delivery</th>
+                    <th>Payment</th>
+                    <th>Store</th>
+                    <th>Total</th>
+                    <th>Discount</th>
+                    <th>Final</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.length === 0 ? (
+                    <tr><td colSpan={10} className="empty-row">No orders</td></tr>
+                  ) : (
+                    orders.map((o) => (
+                      <tr 
+                        key={o.transaction_id}
+                        className={`row-pop-active ${poppingRow === o.transaction_id ? 'row-popping' : ''}`}
+                        onClick={() => handleRowPop(o.transaction_id)}
+                      >
+                        <td>{o.transaction_id}</td>
+                        <td>{o.date}</td>
+                        <td>{o.customer_name}</td>
+                        <td>{o.order_status}</td>
+                        <td>{o.delivery_type}</td>
+                        <td>{o.payment_method}</td>
+                        <td>{o.store_location}</td>
+                        <td>₹ {Number(o.total_amount || 0).toLocaleString('en-IN')}</td>
+                        <td>₹ {Number(o.discount_amount || 0).toLocaleString('en-IN')}</td>
+                        <td>₹ {Number(o.final_amount || 0).toLocaleString('en-IN')}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
       </main>
     </div>
   )
