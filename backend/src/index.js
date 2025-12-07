@@ -6,7 +6,19 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const app = express()
-app.use(cors())
+
+// CORS configuration - allow Netlify frontend and localhost for development
+app.use(
+  cors({
+    origin: [
+      'https://retailstoresaksham.netlify.app',
+      'http://localhost:5173',
+      'http://localhost:3000'
+    ],
+    credentials: true
+  })
+)
+
 app.use(express.json())
 
 app.use('/api/sales', salesRouter)
