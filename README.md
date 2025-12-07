@@ -116,12 +116,12 @@ A full-stack retail sales management system built with React 18 and Node.js + Ex
 
 ## Edge Case Handling
 
-✅ **No Search Results** - Empty state message displayed: "No results. Adjust search or filters."
-✅ **Conflicting Filters** - Multiple filters apply with AND logic, returns empty set if no matches
-✅ **Invalid Numeric Ranges** - Age ranges predefined, date validation in picker
-✅ **Large Filter Combinations** - All filter combinations supported through dynamic SQL
-✅ **Missing Optional Fields** - Fallback values (0, "N/A", "") for missing data
-✅ **Empty Datasets** - Graceful handling with empty state messages in tables
+**No Search Results** - Empty state message displayed: "No results. Adjust search or filters."
+**Conflicting Filters** - Multiple filters apply with AND logic, returns empty set if no matches
+**Invalid Numeric Ranges** - Age ranges predefined, date validation in picker
+**Large Filter Combinations** - All filter combinations supported through dynamic SQL
+**Missing Optional Fields** - Fallback values (0, "N/A", "") for missing data
+**Empty Datasets** - Graceful handling with empty state messages in tables
 
 ## Additional Features Implemented
 
@@ -241,34 +241,6 @@ Retail Store/
 - Total pages: `Math.ceil(total / pageSize)`
 - Bounds validation: `Math.min(requested_page, totalPages)`
 
-## Testing Checklist
-
-✅ Search works with special characters and partial matches
-✅ Filters independently select options and combine correctly
-✅ Sorting preserves active search and filters
-✅ Pagination maintains state across navigation
-✅ All 5 views load and display data correctly
-✅ Empty states handle missing data gracefully
-✅ Responsive design works on mobile/tablet/desktop
-✅ Animations perform smoothly at 60fps
-✅ No JavaScript errors in console
-✅ Row click effect displays with proper animation
-
-## Code Quality Standards
-
-- **No Duplicate Logic:** Search, filter, sort, pagination logic centralized in backend
-- **Separation of Concerns:** Frontend handles UI, Backend handles data logic
-- **Clean Code:** Readable variable names, proper indentation, logical flow
-- **Modular Structure:** Organized by responsibility (routes, utils, components)
-- **Error Handling:** Try-catch blocks, user-friendly error messages
-- **Performance:** Optimized queries, efficient state management, GPU-accelerated animations
-- **Best Practices:** Parameterized SQL, AbortController for cleanup, React hooks patterns
-
-## Deployment
-
-### Recommended Platforms
-- **Backend:** Heroku, Railway, Render (Node.js + SQLite)
-- **Frontend:** Vercel, Netlify, GitHub Pages
 
 ### Environment Variables
 ```
@@ -276,13 +248,7 @@ BACKEND_URL=http://localhost:4000  # Frontend
 DATABASE_PATH=./data/retail.db     # Backend
 ```
 
-## Notes
 
-- All functionality built from scratch without auto-generated code
-- Direct SQL implementation demonstrates understanding of database concepts
-- React state management shows clear architectural thinking
-- CSS animations showcase attention to user experience
-- Edge cases handled with thoughtful design decisions
 
 ---
 
