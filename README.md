@@ -248,10 +248,3 @@ BACKEND_URL=http://localhost:4000  # Frontend
 DATABASE_PATH=./data/retail.db     # Backend
 ```
 
-
-
----
-
-**Assignment:** TruEstate SDE Intern Assignment  
-**Submission Date:** 08 December 2025  
-**Status:** ✅ Complete
