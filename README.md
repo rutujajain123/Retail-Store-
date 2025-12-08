@@ -1,5 +1,9 @@
 # Retail Sales Management System
 
+## Live Application
+🚀 **Frontend:** https://retailstoresaksham.netlify.app/  
+🔧 **Backend API:** https://retail-store-zt7h.onrender.com
+
 ## Overview
 A full-stack retail sales management system built with React 18 and Node.js + Express.js. Features advanced search, multi-select filtering, dynamic sorting, and pagination across customer transactions, store aggregations, product catalogs, customer profiles, and order management. Engineered for performance with SQLite3 backend, responsive UI with 20+ CSS animations, and complete separation of concerns between frontend and backend.
 
@@ -7,8 +11,9 @@ A full-stack retail sales management system built with React 18 and Node.js + Ex
 - **Backend:** Node.js, Express.js, SQLite3 (better-sqlite3), CSV data ingestion
 - **Frontend:** React 18 with Hooks, Vite build tool, CSS3 with glassmorphism effects
 - **Database:** SQLite3 with WAL mode for concurrent reads
-- **API:** RESTful JSON API on port 4000
+- **API:** RESTful JSON API
 - **Styling:** Pure CSS3 with animations and responsive design
+- **Deployment:** Netlify (Frontend), Render (Backend)
 
 ## Search Implementation Summary
 
@@ -116,12 +121,12 @@ A full-stack retail sales management system built with React 18 and Node.js + Ex
 
 ## Edge Case Handling
 
-**No Search Results** - Empty state message displayed: "No results. Adjust search or filters."
-**Conflicting Filters** - Multiple filters apply with AND logic, returns empty set if no matches
-**Invalid Numeric Ranges** - Age ranges predefined, date validation in picker
-**Large Filter Combinations** - All filter combinations supported through dynamic SQL
-**Missing Optional Fields** - Fallback values (0, "N/A", "") for missing data
-**Empty Datasets** - Graceful handling with empty state messages in tables
+✅ **No Search Results** - Empty state message displayed: "No results. Adjust search or filters."
+✅ **Conflicting Filters** - Multiple filters apply with AND logic, returns empty set if no matches
+✅ **Invalid Numeric Ranges** - Age ranges predefined, date validation in picker
+✅ **Large Filter Combinations** - All filter combinations supported through dynamic SQL
+✅ **Missing Optional Fields** - Fallback values (0, "N/A", "") for missing data
+✅ **Empty Datasets** - Graceful handling with empty state messages in tables
 
 ## Additional Features Implemented
 
@@ -140,13 +145,14 @@ A full-stack retail sales management system built with React 18 and Node.js + Ex
 - **Color-coded Status** - Visual indicators for different order statuses
 - **Loading States** - Loading spinner and disabled state management
 - **Error Handling** - User-friendly error messages with retry capability
+- **Row Pop Effects** - Interactive animations on table row selection
 
 ### Performance Optimizations
 - **GPU-Accelerated Animations** - Using transform and opacity only
 - **Efficient Queries** - Parameterized SQL with proper indexing
 - **Request Cancellation** - AbortController for in-flight request cleanup
 - **State Management** - Predictable React hooks state handling
-- **Code Splitting** - Single component with conditional rendering (no unnecessary modules)
+- **Code Splitting** - Single component with conditional rendering
 
 ## Setup Instructions
 
@@ -154,7 +160,7 @@ A full-stack retail sales management system built with React 18 and Node.js + Ex
 - Node.js (v14+)
 - npm or yarn
 
-### Backend Setup
+### Local Backend Setup
 ```bash
 cd backend
 npm install
@@ -162,7 +168,7 @@ npm run ingest    # Populate database from CSV
 npm run dev       # Start development server (port 4000)
 ```
 
-### Frontend Setup
+### Local Frontend Setup
 ```bash
 cd frontend
 npm install
@@ -174,7 +180,7 @@ npm run dev       # Start development server (port 5173)
 - CSV data ingested from `/backend/data/truestate_assignment_dataset.csv`
 - WAL mode enabled for concurrent read access
 
-### Running the Full Application
+### Running the Full Application Locally
 1. Terminal 1: `cd backend && npm run dev`
 2. Terminal 2: `cd frontend && npm run dev`
 3. Open http://localhost:5173 in browser
@@ -183,38 +189,74 @@ npm run dev       # Start development server (port 5173)
 
 ```
 Retail Store/
-├── backend/
+├── backend/                       ← Express server + SQLite
 │   ├── src/
-│   │   ├── index.js              # Express server entry point
-│   │   ├── routes/
-│   │   │   └── sales.js         # All /api/sales/* endpoints
+│   │   ├── index.js              # Express server with CORS
+│   │   ├── routes/sales.js       # All /api/sales/* endpoints
 │   │   └── utils/
-│   │       ├── db.js            # SQLite connection & config
-│   │       └── ingest.js        # CSV data ingestion
-│   ├── data/
-│   │   ├── retail.db            # SQLite database
-│   │   └── truestate_assignment_dataset.csv
-│   ├── package.json
-│   └── README.md
+│   │       ├── db.js             # SQLite connection & config
+│   │       └── ingest.js         # CSV data ingestion
+│   ├── data/retail.db            # SQLite database
+│   └── package.json
 │
-├── frontend/
+├── frontend/                      ← React + Vite
 │   ├── src/
-│   │   ├── main.jsx             # React entry point
-│   │   ├── App.jsx              # Main component (all views/state)
-│   │   ├── App.css              # Component styles
-│   │   ├── index.css            # Global styles & animations
-│   │   ├── assets/              # Images/SVGs
-│   │   └── (reserved directories for future expansion)
-│   ├── public/
-│   ├── package.json
-│   ├── vite.config.js
-│   └── README.md
+│   │   ├── App.jsx               # Main component (all state)
+│   │   ├── App.css               # Component styles
+│   │   ├── index.css             # Global styles & animations
+│   │   ├── apiClient.js          # API configuration
+│   │   └── main.jsx
+│   ├── .env                      # Environment variables
+│   ├── .env.example              # Template for .env
+│   └── package.json
 │
 ├── docs/
-│   └── architecture.md          # Comprehensive architecture document
+│   └── architecture.md           # Technical architecture
 │
-└── README.md                    # This file
+└── README.md                     # This file
 ```
+
+## Deployment
+
+### Frontend Deployment (Netlify)
+- **URL:** https://retailstoresaksham.netlify.app/
+- **Build Command:** `npm run build`
+- **Environment Variables:**
+  - `VITE_API_URL=https://retail-store-zt7h.onrender.com`
+- **Connected to:** GitHub master branch (auto-deploys on push)
+
+### Backend Deployment (Render)
+- **URL:** https://retail-store-zt7h.onrender.com
+- **Environment:** Node.js
+- **Database:** SQLite (local storage with WAL mode)
+- **Health Check:** GET `/health` returns `{"status":"ok"}`
+- **CORS Configuration:** Allows Netlify frontend domain and localhost for development
+
+## API Documentation
+
+### Endpoints
+- **GET `/health`** - Server health check
+- **GET `/api/sales/meta`** - Filter metadata (regions, genders, categories, payments, tags)
+- **GET `/api/sales`** - Paginated transactions with search, filters, sort
+  - Parameters: `page`, `pageSize`, `sort`, `search`, `regions`, `genders`, `categories`, `payments`, `tags`, `ageMin`, `ageMax`, `dateStart`, `dateEnd`
+- **GET `/api/sales/stores`** - Store-level aggregation
+- **GET `/api/sales/products`** - Product-level aggregation
+- **GET `/api/sales/customers`** - Customer-level aggregation
+- **GET `/api/sales/orders`** - Recent orders list
+
+## Data Fields Processed
+
+**Customer Fields:**
+Customer ID | Customer Name | Phone Number | Gender | Age | Customer Region | Customer Type
+
+**Product Fields:**
+Product ID | Product Name | Brand | Product Category | Tags
+
+**Sales Fields:**
+Quantity | Price per Unit | Discount Percentage | Total Amount | Final Amount
+
+**Operational Fields:**
+Date | Payment Method | Order Status | Delivery Type | Store ID | Store Location | Salesperson ID | Employee Name
 
 ## Key Implementation Details
 
@@ -222,13 +264,11 @@ Retail Store/
 - Case-insensitive LOWER() comparison
 - LIKE operator for substring matching
 - Parameters: `%` + searchTerm + `%` for flexible matching
-- Applied across customer_name and phone_number fields
 
 ### Filter Architecture
 - Metadata endpoint returns distinct filter values
 - Dynamic SQL WHERE clause built from active filters
 - Multiple values for same filter type: `field IN (val1, val2, ...)`
-- Different filter types combined with AND logic
 
 ### Sorting Logic
 - Three sort fields: date, quantity, customer_name
@@ -239,12 +279,73 @@ Retail Store/
 - Current page: 1-indexed (user-facing)
 - OFFSET calculation: `(page - 1) * pageSize`
 - Total pages: `Math.ceil(total / pageSize)`
-- Bounds validation: `Math.min(requested_page, totalPages)`
 
+## Testing Checklist
 
-### Environment Variables
-```
-BACKEND_URL=http://localhost:4000  # Frontend
-DATABASE_PATH=./data/retail.db     # Backend
-```
+✅ Search works with special characters and partial matches
+✅ Filters independently select options and combine correctly
+✅ Sorting preserves active search and filters
+✅ Pagination maintains state across navigation
+✅ All 5 views load and display data correctly
+✅ Empty states handle missing data gracefully
+✅ Responsive design works on mobile/tablet/desktop
+✅ Animations perform smoothly at 60fps
+✅ Frontend successfully connects to Render backend
+✅ Data loads from production API
+✅ Row pop effects display on interaction
+
+## Code Quality Standards
+
+- ✅ No duplicate logic - Search, filter, sort, pagination logic centralized
+- ✅ Separation of concerns - Frontend handles UI, Backend handles data
+- ✅ Clean code - Readable variable names, proper indentation, logical flow
+- ✅ Modular structure - Organized by responsibility
+- ✅ Error handling - Try-catch blocks, user-friendly error messages
+- ✅ Performance - Optimized queries, efficient state management, GPU-accelerated animations
+- ✅ Best practices - Parameterized SQL, AbortController for cleanup, React hooks patterns
+
+## Assignment Compliance
+
+✅ All Functional Requirements Met:
+- Full-text search (case-insensitive, across Customer Name & Phone)
+- 7 multi-select filters (Region, Gender, Age, Category, Tags, Payment, Date)
+- 3 sorting options (Date, Quantity, Customer Name)
+- Pagination with 10 items per page + Next/Previous navigation
+
+✅ All Engineering Requirements Met:
+- Clean separation of frontend and backend
+- Readable, maintainable, modular code
+- Predictable state management
+- No duplicate logic for filtering/sorting
+- Exact project structure match
+- Comprehensive architecture documentation
+
+✅ All UI Requirements Met:
+- Clear, minimal, structured layout per Figma
+- Search bar, filter panel, transaction table, sorting dropdown, pagination
+- Professional design with responsive layout
+- 20+ CSS animations and interactive elements
+
+## Future Enhancements
+
+- [ ] User authentication & authorization
+- [ ] Export data to CSV/PDF
+- [ ] Advanced analytics dashboard
+- [ ] Real-time data updates (WebSockets)
+- [ ] Dark mode theme
+- [ ] Advanced charting and visualization
+- [ ] Caching layer (Redis)
+- [ ] Database query optimization
+- [ ] API rate limiting & throttling
+- [ ] Comprehensive logging system
+
+---
+
+**Assignment:** TruEstate SDE Intern Assignment  
+**Submission Date:** 08 December 2025  
+**Status:** ✅ Complete & Deployed
+
+**GitHub Repository:** https://github.com/rutujajain123/Retail-Store-  
+**Frontend Live:** https://retailstoresaksham.netlify.app/  
+**Backend Live:** https://retail-store-zt7h.onrender.com
 
