@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import './App.css'
-import { API_URL } from './apiClient'
 
-const API_BASE = API_URL || 'http://localhost:4000'
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 
 const sortOptions = [
   { value: 'dateDesc', label: 'Date (Newest First)' },
